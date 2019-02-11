@@ -1,119 +1,208 @@
-const SQUARE = 512;
-let squareSize = SQUARE;
+const SQUARE = 256;
 
-let x = 0;
-let y = 0;
-let beginRow = 0
-let beginCol = 0
-let endCol = scene.canvasWidth;
-let endRow = scene.canvasHeight;
+class Square {
+  constructor(){
+    this.patternSize = SQUARE;
 
-let nextColumn = squareSize;
-let nextRow = squareSize;
-let lineSize = squareSize/2;
-let mirrorChance = .5;
-
-let color = [360, 80, 80]
-const white = [0, 100, 100]
-const black = [0, 0, 0]
-
-const pattern = {
-  draw(){
-    let drawIncrement = 0;
-    const mirrorSquare = coinFlip(true, false, mirrorChance);
-    // let drawLine = coinFlip(true, false);
-    let drawLine = false;
-  
-    //DRAW SQUARE  
-    for(let i=0; i<squareSize; i++){
-      let dist = i/lineSize;
-      if(dist%1 === 0){
-        drawLine = !drawLine;
-      };
-  
-      if(drawLine){
-        // var colorIncrease = i
-        // if (colorIncrease+color[0] > 360) {
-        //   colorIncrease = colorIncrease-360;
-        // }
-        stroke(color[0],color[1],color[2]);
-        // console.log(color[0]+colorIncrease)
-      }
-      else {
-        stroke(0, 0);
-      };
-  
-      safearea = 0;
-      if(!mirrorSquare){
-        // stroke(color[0]+i,color[1],color[2]);
-        line(x+squareSize-drawIncrement , y-safearea, x+squareSize+safearea, y+drawIncrement);
-        // stroke(color[0]+i,color[1],color[2]);
-        line(x-safearea , y+drawIncrement, x+squareSize-drawIncrement, y+squareSize+safearea); 
-      }
-      else {
-        line(x-safearea , y+drawIncrement, x+drawIncrement, y-safearea);
-        line(x+drawIncrement , y+squareSize+safearea, x+squareSize+safearea, y+drawIncrement);
-      }
-      drawIncrement++
-    }
-  },
-  moveCol(){
-    x = x+nextColumn;
-  },
-  moveRow(){
-    y = y+nextRow;
-  },
-  randomize(){
-    beginCol = coinFlip(0, width/2, .95);
-    beginRow = coinFlip(0, height/2, .95);
-    endCol = coinFlip(scene.canvasWidth, width/2, .95);
-    endRow = coinFlip(scene.canvasHeight, width/2, .95);
-
-    x = beginCol
-    y = beginRow
+    this.xPos = 0;
+    this.yPos = 0;
+    this.beginRow = 0;
+    this.beginCol = 0;
+    this.endCol = scene.canvasWidth;
+    this.endRow = scene.canvasHeight;
     
-    // squareSize = coinFlip(SQUARE, squareSize*coinFlip(.5, 2, 0.2), .3)
-    squareSize = coinFlip(SQUARE, squareSize*coinFlip(.5, 2, 0.2), .3)
-    // scene.speed = (SQUARE*30)/squareSize;
+    this.nextColumn = this.patternSize;
+    this.nextRow = this.patternSize;
+    
+    this.patternIsMirrored = false
+    this.patternMirrorChance = .5;
+    
+    this.lineIsFilled = false;
+    this.lineInterval = this.patternSize/2;
+    
+    this.color = [360, 80, 80];
+    this.colorFromJson = false;
+    this.white = [0, 100, 100];
+    this.black = [0, 0, 0];
 
-    nextColumn = squareSize*coinFlip(1, 2, .9);
-    nextRow = squareSize*coinFlip(1, 2, .9);
-    // mirrorChance = coinFlip(.5, coinFlip(0, 1), .9);
-    let randomColor = [random(0,360), 80, 80];
+    //Randimization mode
+    this.randLoop = false;
+    this.randPosition = true;
+    this.randPatternScaling = true;
+    this.randColor = true;
+    this.randMirroring = false;
 
-    //Randomize Line and Color
-    let randomize = random(1)
-    if (randomize<0.1){
-      lineSize = squareSize/coinFlip(32, 64)
-      color = coinFlip(coinFlip(black, white), randomColor)
-      nextColumn = squareSize*coinFlip(1, 2, .25)
-      nextRow = squareSize*coinFlip(1, 2, .25)
+  };
+
+  draw(){
+    this.patternIsMirrored = coinFlip(true, false, this.patternMirrorChance);
+    this.drawPattern();
+  };
+
+  drawPattern(){
+    let drawPosition = 0;
+    const drawIncrement = 1;
+
+    for(let i=0; i<this.patternSize; i++){
+      //line is either filled or transparent
+      let dist = i/this.lineInterval;
+      if(dist%1 === 0){this.lineIsFilled = !this.lineIsFilled;};
+      this.lineIsFilled ? stroke(this.color[0],this.color[1],this.color[2]) : stroke(0, 0);
+
+      if(!this.patternIsMirrored){
+        line(this.xPos+this.patternSize-drawPosition , this.yPos, this.xPos+this.patternSize, this.yPos+drawPosition);
+        line(this.xPos , this.yPos+drawPosition, this.xPos+this.patternSize-drawPosition, this.yPos+this.patternSize); 
+      }
+      else {
+        line(this.xPos , this.yPos+drawPosition, this.xPos+drawPosition, this.yPos);
+        line(this.xPos+drawPosition , this.yPos+this.patternSize, this.xPos+this.patternSize, this.yPos+drawPosition);
+      }
+      drawPosition=drawPosition+drawIncrement
     }
-    else if (randomize<0.2){
-      lineSize = squareSize/8
-      color = coinFlip(black, white)
-      nextColumn = squareSize*coinFlip(1, 2, .5)
-      nextRow = squareSize*coinFlip(1, 2, .5)
+  };
+
+
+  move(){
+    this.moveCol();
+    if (this.xPos > this.endCol) {
+      if(this.randLoop){
+        this.randomize();
+      }
+
+      this.xPos = this.beginCol;
+      this.moveRow();
     }
-    else if (randomize<0.4){
-      lineSize = squareSize/4
-      color = coinFlip(black, white)
+    if (this.yPos > this.endRow) {
+      this.randomize();
+      this.xPos = this.beginCol;
+      this.yPos = this.beginRow;
+      scene.pause(750);
     }
-    else if (randomize<0.7){
-      squareSize = coinFlip(SQUARE*4, coinFlip(SQUARE*8, SQUARE*16));
-      nextColumn = squareSize;
-      nextRow = squareSize;
-      lineSize = squareSize/coinFlip(2, 4);
-      color = coinFlip(black, white)
-      color = coinFlip(color, randomColor, 0.3)
+  }
+
+  moveCol(){
+    this.xPos = this.xPos+this.nextColumn;
+  };
+  moveRow(){
+    this.yPos = this.yPos+this.nextRow;
+  };
+
+
+  randomize(){
+    this.randomizePatternScaling(this.randPatternScaling);
+    this.randomizePosition(this.randPosition);
+    this.randomizeColor(this.randColor);
+    this.randomizeMirroring(false);
+
+    let randomChance = random(1)
+    if (randomChance<0.2){
+      this.micro();
+    }
+    else if (randomChance<0.4){
+      this.small();
+    }
+    else if (randomChance<0.6){
+      this.normal();
+    }
+    else if (randomChance<0.8){
+      this.large();
     }
     else {
-      lineSize = squareSize/2;
-      color = randomColor;
+      this.extraLarge()
     };
-  },
-  greyScale(){
-    color = [0, 0, random(0,100)];
-  },
+  }
+  randomizePatternScaling(randomize=true){
+    if(randomize){
+      this.patternSize = coinFlip(SQUARE, this.patternSize*coinFlip(.5, 2, 0.2), .3)
+    }
+    else{
+      this.patternSize = SQUARE;
+    }
+  };
+  randomizePosition(randomize=true){
+    if(randomize){
+      this.beginCol = coinFlip(0, width/2, .95);
+      this.beginRow = coinFlip(0, height/2, .95);
+      this.endCol = coinFlip(scene.canvasWidth, width/2, .95);
+      this.endRow = coinFlip(scene.canvasHeight, width/2, .95);
+      this.nextColumn = this.patternSize*coinFlip(1, 2, .9);
+      this.nextRow = this.patternSize*coinFlip(1, 2, .9);
+    }
+    else{
+      this.beginCol = 0;
+      this.beginRow = 0;
+      this.endCol = scene.canvasWidth;
+      this.endRow = scene.canvasHeight;
+      this.nextColumn = this.patternSize;
+      this.nextRow = this.patternSize;
+    }
+  };
+  randomizeColor(randomize=true){
+    if (randomize){
+      if(this.colorFromJson){
+        this.randomcolor = selectColor();
+      }
+      else{
+        this.randomcolor = [random(0,360), 80, 80];
+      }
+      if (this.color == this.black){
+        this.color = coinFlip(coinFlip(this.black, this.white, 0.05), this.randomcolor)
+        console.log(this.color," is new black")
+      }
+      else if (this.color == this.white){
+        this.color = coinFlip(coinFlip(this.black, this.white, 0.95), this.randomcolor)
+        console.log(this.color," is new white")
+      }
+      this.color = coinFlip(coinFlip(this.black, this.white), this.randomcolor)
+    }
+  };
+  randomizeMirroring(randomize=true){
+    if (randomize){
+      this.patternMirrorChance = coinFlip(.5, coinFlip(0, 1), .9);
+    }
+    else{
+      this.patternMirrorChance = 0.5
+    }
+  };
 
+  micro(){
+    this.lineInterval = this.patternSize/coinFlip(32, 64)
+    this.nextColumn = this.patternSize*coinFlip(1, 2, .25)
+    this.nextRow = this.patternSize*coinFlip(1, 2, .25)
+  };
+  small(){
+    this.lineInterval = this.patternSize/8
+    this.nextColumn = this.patternSize*coinFlip(1, 2, .5)
+    this.nextRow = this.patternSize*coinFlip(1, 2, .5)
+  };
+  normal(){
+    // console.log("normal")
+    this.lineInterval = this.patternSize/4
+  }
+  large(){
+    // console.log("large")
+    this.patternSize = coinFlip(SQUARE, coinFlip(SQUARE*4, SQUARE*8));
+    this.nextColumn = this.patternSize;
+    this.nextRow = this.patternSize;
+    this.lineInterval = this.patternSize/coinFlip(2, 4);
+  };
+  extraLarge(){
+    // console.log("extra")
+    this.patternSize = coinFlip(SQUARE, coinFlip(SQUARE*8, SQUARE*16));
+    this.lineInterval = this.patternSize/2;
+  };
+
+  changeMode(){
+    this.randLoop = coinFlip(true, false);
+    this.randPosition = coinFlip(true, false);
+    this.randPatternScaling = coinFlip(true, false);
+    this.randColor = true;
+    this.randMirroring = coinFlip(true, false);
+    console.log(this.randLoop,this.randPosition,this.randPatternScaling,this.randPatternScaling,this.randColor,this.randColor,this.randMirroring)
+  }
+
+  newColor(){
+    this.colorFromJson = true;
+    this.color = selectColor();
+  }
 }

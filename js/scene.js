@@ -1,23 +1,25 @@
-//SCENE SETTINGS
 const scene = {
+  titleFull: "Stripes",
+  titleShort: "Stripes",
   canvas: null,
+  relativeSize: 16,
   windowWidth: document.documentElement.clientWidth,
   windowHeight: document.documentElement.clientHeight,
 
   canvasWidth: this.windowWidth,
   canvasHeight: this.windowHeight,
-
+  color: [0,0,0],
+  alfa: 1,
   looping: true,
   countDraw: 0,
-  speed: 30,
-
-  setCanvas(){
-
-  },
+  fps: 5,
+  temporalFps: this.fps,
+  trailing: 1,
+  mode: false,
 
   wrapCanvas (id) {
     const canvasWrapper = document.createElement('div');
-    canvasWrapper.style.cssText = 'position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000;';
+    canvasWrapper.style.cssText = `position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:hsl(${scene.color[0]}, ${scene.color[1]}%, ${scene.color[2]}%);`;
     document.body.appendChild(canvasWrapper);
     canvasWrapper.appendChild(document.getElementById(id));
   },
@@ -50,14 +52,38 @@ const scene = {
   download(counter, totalImages =100, everyNth = 1){
     totalImages = totalImages*everyNth;
     if(counter < totalImages & counter%everyNth===0){
-      saveCanvas('image', 'png');
+      saveCanvas(this.titleShort, 'png');
     }
   },
   
+  pauseFps(msec){
+    setTimeout(() => {
+      this.fps = 20;
+
+    }, msec);
+    this.fps = 1;
+  },
+
   pause(msec){
     setTimeout(() => {
       loop()
     }, msec);
     noLoop()
+  },
+
+  fadeIn(frames){
+    if(scene.alfa>=0){
+      let step = 1/frames
+      scene.alfa=scene.alfa-step;
+      background(scene.color[0],scene.color[1],scene.color[2], scene.alfa);
+    }
+  },
+
+  fadeOut(frames){
+    if(scene.alfa<=1){
+      let step = 1/frames
+      scene.alfa=scene.alfa+step;
+      background(scene.color[0],scene.color[1],scene.color[2], scene.alfa);
+    }
   }
 }

@@ -1,6 +1,14 @@
+let quantity = 1;
+const objArr = []
+
+function preload(){
+  colorsData = loadJSON("data/palettes.json");
+}
+
 function setup() {
-  scene.canvasWidth = scene.windowWidth-(scene.windowWidth%squareSize);
-  scene.canvasHeight = scene.windowHeight-(scene.windowHeight%squareSize);
+  selectPalette(false, false, 5);
+  scene.canvasWidth = scene.windowWidth-(scene.windowWidth%SQUARE);
+  scene.canvasHeight = scene.windowHeight-(scene.windowHeight%SQUARE);
 
   scene.canvas = createCanvas(scene.canvasWidth, scene.canvasHeight);
   scene.canvas.class("canvasClass");
@@ -9,38 +17,31 @@ function setup() {
 
   colorMode(HSL, 360,100,100);
   background(0);
+  scene.fitCanvasToScreen();
   window.addEventListener('resize', scene.fitCanvasToScreen, false);
-  pattern.randomize();
+
+  if(objArr.length<quantity){
+    for(let i =0; i<quantity; i++){
+      objArr.push(new Square());
+      objArr[i].changeMode();
+      objArr[i].newColor();
+      objArr[i].randomize();
+    }
+  }
 }
 
 
 function draw() {
-  frameRate(scene.speed)
-  pattern.draw();
-  pattern.moveCol();
-  if (x > endCol) {
-    pattern.randomize();
-    x = beginCol;
-    pattern.moveRow();
-  }
-  if (y > endRow) {
-  pattern.randomize();
-  scene.download(scene.countDraw, 100, 3)
-  scene.pause(1000);
-  scene.countDraw++;
-  }
-}
+  noSmooth();
+  frameRate(scene.fps);
 
-function keyPressed() {
-  if (keyCode === 32) {
-    if (scene.looping) {
-      noLoop()
-      scene.looping = false;
-    } else {
-      loop()
-      scene.looping = true;
-    }
+  for(let i = objArr.length-1; i >= 0; i-- ){
+    objArr[i].draw();
+    objArr[i].move();
   }
+
+  // scene.download(scene.countDraw, 100, 3)
+  scene.countDraw++;
 }
 
 
