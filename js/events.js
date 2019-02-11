@@ -1,7 +1,10 @@
-// function mousePressed() {
-//   for(i = objArr.length-1; i >= 0; i-- ){
-//     objArr[i].pressed = true;
-//   }
+function mousePressed() {
+  selectPalette(false, false, 5);
+  for(i = objArr.length-1; i >= 0; i-- ){
+    objArr[i].changeMode();
+    objArr[i].newColor();
+  }
+}
   
 // }
 // function mouseReleased() {
@@ -62,7 +65,7 @@ function keyPressed() {
     for(i = objArr.length-1; i >= 0; i-- ){
       objArr[i].newColor();
     }
-    // console.log("c:color");
+    console.log("c:color");
   }
 
 

@@ -1,6 +1,6 @@
 const scene = {
-  titleFull: "Stripes",
-  titleShort: "Stripes",
+  titleFull: "10print",
+  titleShort: "10print",
   canvas: null,
   relativeSize: 16,
   windowWidth: document.documentElement.clientWidth,
@@ -12,7 +12,7 @@ const scene = {
   alfa: 1,
   looping: true,
   countDraw: 0,
-  fps: 5,
+  fps: 30,
   temporalFps: this.fps,
   trailing: 1,
   mode: false,

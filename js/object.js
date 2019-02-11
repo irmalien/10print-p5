@@ -1,4 +1,4 @@
-const SQUARE = 256;
+const SQUARE = mobileVersion(256, 64)
 
 class Square {
   constructor(){
@@ -17,7 +17,7 @@ class Square {
     this.patternIsMirrored = false
     this.patternMirrorChance = .5;
     
-    this.lineIsFilled = false;
+    this.lineIsFilled = true;
     this.lineInterval = this.patternSize/2;
     
     this.color = [360, 80, 80];
@@ -147,11 +147,11 @@ class Square {
       }
       if (this.color == this.black){
         this.color = coinFlip(coinFlip(this.black, this.white, 0.05), this.randomcolor)
-        console.log(this.color," is new black")
+        // console.log(this.color," is new black")
       }
       else if (this.color == this.white){
         this.color = coinFlip(coinFlip(this.black, this.white, 0.95), this.randomcolor)
-        console.log(this.color," is new white")
+        // console.log(this.color," is new white")
       }
       this.color = coinFlip(coinFlip(this.black, this.white), this.randomcolor)
     }
@@ -198,7 +198,7 @@ class Square {
     this.randPatternScaling = coinFlip(true, false);
     this.randColor = true;
     this.randMirroring = coinFlip(true, false);
-    console.log(this.randLoop,this.randPosition,this.randPatternScaling,this.randPatternScaling,this.randColor,this.randColor,this.randMirroring)
+    console.log("Mode:",this.randLoop,this.randPosition,this.randPatternScaling,this.randPatternScaling,this.randColor,this.randColor,this.randMirroring);
   }
 
   newColor(){
